@@ -11,15 +11,12 @@ enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
 #define CPY DEL
 
 /* timing helper function */
-static double tvgetf(void)
+static double tvgetf(struct timespec *ts)
 {
-    struct timespec ts;
     double sec;
-
-    clock_gettime(CLOCK_REALTIME, &ts);
-    sec = ts.tv_nsec;
+    sec = ts->tv_nsec;
     sec /= 1e9;
-    sec += ts.tv_sec;
+    sec += ts->tv_sec;
 
     return sec;
 }
@@ -28,8 +25,9 @@ static double tvgetf(void)
 static void rmcrlf(char *s)
 {
     size_t len = strlen(s);
-    if (len && s[len - 1] == '\n')
-        s[--len] = 0;
+    if (len && s[--len] == '\n')
+        s[len] = 0;
+    /*by https://hackmd.io/s/rkJviVkcz show this work better*/
 }
 
 #define IN_FILE "cities.txt"
@@ -42,15 +40,18 @@ int main(int argc, char **argv)
     int rtn = 0, idx = 0, sidx = 0;
     FILE *fp = fopen(IN_FILE, "r");
     double t1, t2;
+    struct timespec ts1,ts2;
 
     if (!fp) { /* prompt, open, validate file for reading */
         fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
         return 1;
     }
 
-    t1 = tvgetf();
+    clock_gettime(CLOCK_REALTIME, &ts1);
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
         char *p = word;
+        /*printf("%s\n", word);
+        getchar();*/
         if (!tst_ins_del(&root, &p, INS, CPY)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
@@ -58,10 +59,13 @@ int main(int argc, char **argv)
         }
         idx++;
     }
-    t2 = tvgetf();
+    clock_gettime(CLOCK_REALTIME, &ts2);
+    t1 = tvgetf(&ts1);
+    t2 = tvgetf(&ts2);
 
     fclose(fp);
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
+    printf("Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
 
     for (;;) {
         char *p;
@@ -84,13 +88,16 @@ int main(int argc, char **argv)
             }
             rmcrlf(word);
             p = word;
-            t1 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts1);
             res = tst_ins_del(&root, &p, INS, CPY);
-            t2 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts2);
+            t1 = tvgetf(&ts1);
+            t2 = tvgetf(&ts2);
             if (res) {
                 idx++;
                 printf("  %s - inserted in %.6f sec. (%d words in tree)\n",
                        (char *) res, t2 - t1, idx);
+                printf("Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
             } else
                 printf("  %s - already exists in list.\n", (char *) res);
             break;
@@ -101,12 +108,15 @@ int main(int argc, char **argv)
                 break;
             }
             rmcrlf(word);
-            t1 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts1);
             res = tst_search(root, word);
-            t2 = tvgetf();
-            if (res)
+            clock_gettime(CLOCK_REALTIME, &ts2);
+            t1 = tvgetf(&ts1);
+            t2 = tvgetf(&ts2);
+            if (res) {
                 printf("  found %s in %.6f sec.\n", (char *) res, t2 - t1);
-            else
+                printf("Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
+            } else
                 printf("  %s not found.\n", word);
             break;
         case 's':
@@ -116,11 +126,14 @@ int main(int argc, char **argv)
                 break;
             }
             rmcrlf(word);
-            t1 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts1);
             res = tst_search_prefix(root, word, sgl, &sidx, LMAX);
-            t2 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts2);
+            t1 = tvgetf(&ts1);
+            t2 = tvgetf(&ts2);
             if (res) {
-                printf("  %s - searched prefix in %.6f sec\n\n", word, t2 - t1);
+                printf("  %s - searched prefix in %.6f sec\n", word, t2 - t1);
+                printf("Clock %ld \n\n", ts2.tv_nsec - ts1.tv_nsec);
                 for (int i = 0; i < sidx; i++)
                     printf("suggest[%d] : %s\n", i, sgl[i]);
             } else
@@ -135,13 +148,16 @@ int main(int argc, char **argv)
             rmcrlf(word);
             p = word;
             printf("  deleting %s\n", word);
-            t1 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts1);
             res = tst_ins_del(&root, &p, DEL, CPY);
-            t2 = tvgetf();
+            clock_gettime(CLOCK_REALTIME, &ts2);
+            t1 = tvgetf(&ts1);
+            t2 = tvgetf(&ts2);
             if (res)
                 printf("  delete failed.\n");
             else {
                 printf("  deleted %s in %.6f sec\n", word, t2 - t1);
+                printf("Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
                 idx--;
             }
             break;
