@@ -6,7 +6,7 @@
 #include "tst.h"
 
 /** constants insert, delete, max word(s) & stack nodes */
-enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
+enum { INS, DEL, WRDMAX = 128, STKMAX = 512, LMAX = 8192 };
 #define REF INS
 #define CPY DEL
 
@@ -65,7 +65,7 @@ int main(int argc, char **argv)
 
     fclose(fp);
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
-    printf("Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
+    printf("loaded-Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
 
     for (;;) {
         char *p;
@@ -127,13 +127,15 @@ int main(int argc, char **argv)
             }
             rmcrlf(word);
             clock_gettime(CLOCK_REALTIME, &ts1);
+            //res = tst_search_prefix(root, word, sgl, &sidx, LMAX);
             res = tst_search_prefix(root, word, sgl, &sidx, LMAX);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
             if (res) {
                 printf("  %s - searched prefix in %.6f sec\n", word, t2 - t1);
-                printf("Clock %ld \n\n", ts2.tv_nsec - ts1.tv_nsec);
+                if(ts1.tv_sec == ts2.tv_sec)
+                    printf("Clock %ld \n\n", ts2.tv_nsec - ts1.tv_nsec);
                 for (int i = 0; i < sidx; i++)
                     printf("suggest[%d] : %s\n", i, sgl[i]);
             } else
