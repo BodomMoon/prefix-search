@@ -45,4 +45,14 @@ clean:
 	$(RM) $(TESTS) $(OBJS)
 	$(RM) $(deps)
 
+bench:$(TESTS) test.txt
+	gcc bench.c `pkg-config --cflags --libs glib-2.0` -o bench
+	./bench
+	gcc caculate.c -o caculate -lm
+	./caculate
+
+plot: bench
+	gnuplot scripts/runtime.gp
+	gnuplot scripts/runtime2.gp
+
 -include $(deps)
