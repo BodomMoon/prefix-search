@@ -2,13 +2,19 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <assert.h>
 
 #include "tst.h"
-
+#include "ref.h"
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
 #define REF INS
 #define CPY DEL
+
+typedef struct memory_pool {
+    char *current;
+    char *tail;
+}pool;
 
 /* timing helper function */
 static double tvgetf(void)
@@ -42,6 +48,7 @@ int main(int argc, char **argv)
     int rtn = 0, idx = 0, sidx = 0;
     FILE *fp = fopen(IN_FILE, "r");
     double t1, t2;
+    pool *ptr = init(100000000);
 
     if (!fp) { /* prompt, open, validate file for reading */
         fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
@@ -50,9 +57,16 @@ int main(int argc, char **argv)
 
     t1 = tvgetf();
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
-        char *p = word;
-        /* FIXME: insert reference to each string */
-        if (!tst_ins_del(&root, &p, INS, CPY)) {
+        printf("word = %s\n", word);
+        char *p = mpalloc(ptr , strlen(word)+1);
+        printf("current = %p p = %p\n", ptr->current,p);
+        strncpy( p,word,strlen(word));//why is change ptr????
+        //ptr->current = p + strlen(word)+1;
+        p[strlen(word)] = 0;
+        printf("after current = %p\n p = %p\n", ptr->current,p);
+        assert(p && "insert fail");
+        printf("p = %s\n", p);
+        if (!tst_ins_del(&root, &p, INS, REF)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
@@ -150,6 +164,7 @@ int main(int argc, char **argv)
             break;
         case 'q':
             tst_free_all(root);
+            pool_free(ptr);
             return 0;
             break;
         default:
