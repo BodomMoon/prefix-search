@@ -24,7 +24,8 @@ $(GIT_HOOKS):
 	@echo
 
 OBJS_LIB = \
-    tst.o
+    tst.o \
+    ref.o
 
 OBJS := \
     $(OBJS_LIB) \
