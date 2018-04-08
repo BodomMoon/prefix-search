@@ -70,11 +70,11 @@ run-cache-test: $(TESTS)
 
 build-cache-test: $(TESTS)
 	echo 3 | sudo tee /proc/sys/vm/drop_caches
-	perf stat --repeat 1 \
+	perf stat --repeat 5 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./test_cpy<test2.txt>-
 	echo 3 | sudo tee /proc/sys/vm/drop_caches
-	perf stat --repeat 1 \
+	perf stat --repeat 5 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./test_ref<test2.txt>-
 
