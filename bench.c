@@ -35,34 +35,72 @@ int main()
     fclose(cities);
     fclose(output);
     // make test input success
+
+
+    puts("cpy start");
+    fflush(stdout);
+    fflush(stdin);
+
     assert(freopen("output.txt","w",stdout) &&
            "stdout freopen fail");
-    assert(freopen("test.txt","r+",stdin) &&
+    assert(freopen("test.txt","r",stdin) &&
            "stdin freopen fail");
     system("./test_cpy");
+    fflush(stdout);
+    fflush(stdin);
+;
+    assert(freopen("output2.txt","w",stdout) &&
+           "stdout freopen fail");
+    assert(freopen("test.txt","r",stdin) &&
+           "stdin freopen fail");
+    system("./test_ref");
     fclose(stdout);
     fclose(stdin);
+
+    int clock;
+    int avg1 = 0,time1 = 0 , avg2 =0 ,time2 =0;
     cities = fopen("output.txt", "r");
     output = fopen("clock.txt", "w");
     fscanf(cities, "%s", line);
-    int clock;
     do {
         if(strcmp(line, "Clock")!=0) {
         } else {
             fscanf(cities, "%d", &clock);
             fprintf(output, "%d\n", clock);
-            all += clock;
-            time++;
+            avg1+=clock;
+            time1++;
         }
 
     } while(fscanf(cities, "%s", line) != EOF);
     fclose(cities);
     fclose(output);
+
+    
+    cities = fopen("output2.txt", "r");
+    output = fopen("clock2.txt", "w");
+    fscanf(cities, "%s", line);
+    do {
+        if(strcmp(line, "Clock")!=0) {
+        } else {
+            fscanf(cities, "%d", &clock);
+            fprintf(output, "%d\n", clock);
+            avg2+=clock;
+            time2++;
+        }
+
+    } while(fscanf(cities, "%s", line) != EOF);
+    fclose(cities);
+    fclose(output);
+
     output = fopen("avg.txt", "w");
+    fprintf(output, "CPY avg = %d\n", avg1/time1);
+    fprintf(output, "REF avg = %d\n", avg2/time2);
+    fclose(output);
+    /*output = fopen("avg.txt", "w");
     //printf("all = %d time = %d \n",all,time );
     fprintf(output, "%d\n",all/time);
 
-    fclose(output);
+    fclose(output);/*
 
     /*
     if(freopen("BENCH_O.txt","w",stdout)==NULL)
