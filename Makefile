@@ -51,9 +51,19 @@ bench:$(TESTS) test.txt
 	./bench
 	gcc caculate.c -o caculate -lm
 	./caculate
+	gcc caculate_ref.c -o caculate_ref -lm
+	./caculate_ref
 
 plot: bench
 	gnuplot scripts/runtime.gp
 	gnuplot scripts/runtime2.gp
+
+cache-test: $(TESTS)
+	perf stat --repeat 5 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./test_cpy<test.txt>-
+	perf stat --repeat 5 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./test_ref<test.txt>-
 
 -include $(deps)
