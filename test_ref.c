@@ -11,10 +11,10 @@ enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 1024 };
 #define REF INS
 #define CPY DEL
 
-typedef struct memory_pool {
+/*typedef struct memory_pool {
     char *current;
     char *tail;
-}pool;
+}pool;*/
 
 /* timing helper function */
 static double tvgetf(void)
@@ -48,7 +48,8 @@ int main(int argc, char **argv)
     int rtn = 0, idx = 0, sidx = 0;
     FILE *fp = fopen(IN_FILE, "r");
     double t1, t2;
-    pool *ptr = init(100000000);
+    pool *ptr = init(1000000);
+    int flag = 0;
 
     if (!fp) { /* prompt, open, validate file for reading */
         fprintf(stderr, "error: file open failed '%s'.\n", argv[1]);
@@ -57,21 +58,30 @@ int main(int argc, char **argv)
 
     t1 = tvgetf();
     while ((rtn = fscanf(fp, "%s", word)) != EOF) {
-        printf("word = %s\n", word);
-        char *p = mpalloc(ptr , strlen(word)+1);
-        printf("current = %p p = %p\n", ptr->current,p);
+        flag = 0;
+           //printf("word = %s\n", word);
+        char *p = mpalloc(&ptr , strlen(word)+1);
+        //printf("befora current place = %p value = %p\n", &ptr->current,ptr->current);
+        //printf("befora p place = %p value = %p\n", &p,p);
         strncpy( p,word,strlen(word));//why is change ptr????
-        //ptr->current = p + strlen(word)+1;
         p[strlen(word)] = 0;
-        printf("after current = %p\n p = %p\n", ptr->current,p);
+        //printf("after current = %p p = %p\n", &ptr->current,ptr->current);
         assert(p && "insert fail");
-        printf("p = %s\n", p);
-        if (!tst_ins_del(&root, &p, INS, REF)) {
+        //printf("p = %s\n", p);
+        if (!tst_ins_del(&root, &p, INS, REF,&flag)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
         }
+        //printf("root place = %p value = %p char = %c\n",&root,root,(*(char*)root));
+     
+        if(flag==0){
+        }else{
+            mpfreeback(&ptr,strlen(word)+1);
+        }
+
         idx++;
+        //getchar();
     }
     t2 = tvgetf();
 
@@ -79,7 +89,6 @@ int main(int argc, char **argv)
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
 
     for (;;) {
-        char *p;
         printf(
             "\nCommands:\n"
             " a  add word to the tree\n"
@@ -89,7 +98,6 @@ int main(int argc, char **argv)
             " q  quit, freeing all data\n\n"
             "choice: ");
         fgets(word, sizeof word, stdin);
-        p = NULL;
         switch (*word) {
         case 'a':
             printf("enter word to add: ");
@@ -98,10 +106,15 @@ int main(int argc, char **argv)
                 break;
             }
             rmcrlf(word);
-            p = word;
             t1 = tvgetf();
-            /* FIXME: insert reference to each string */
-            res = tst_ins_del(&root, &p, INS, CPY);
+            char *p = mpalloc(&ptr , strlen(word)+1);
+            strncpy( p,word,strlen(word));
+            p[strlen(word)] = 0;
+            res = tst_ins_del(&root, &p, INS, CPY,&flag);
+            if(flag==0){
+            }else{
+                mpfreeback(&ptr,strlen(word)+1);
+            }
             t2 = tvgetf();
             if (res) {
                 idx++;
@@ -153,7 +166,7 @@ int main(int argc, char **argv)
             printf("  deleting %s\n", word);
             t1 = tvgetf();
             /* FIXME: remove reference to each string */
-            res = tst_ins_del(&root, &p, DEL, CPY);
+            res = tst_ins_del(&root, &p, DEL, CPY,&flag);
             t2 = tvgetf();
             if (res)
                 printf("  delete failed.\n");
@@ -163,7 +176,7 @@ int main(int argc, char **argv)
             }
             break;
         case 'q':
-            tst_free_all(root);
+            tst_free_all(root,REF);
             pool_free(ptr);
             return 0;
             break;
