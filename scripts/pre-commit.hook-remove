@@ -5,16 +5,10 @@ CPPCHECK_OPTS="-I. --error-exitcode=1 ."
 
 RETURN=0
 ASTYLE=$(which astyle)
-if [ $? -ne 0 ]; then
-    echo "[!] astyle not installed. Unable to check source file format policy." >&2
-    exit 1
-fi
+RETURN
 
 CPPCHECK=$(which cppcheck)
-if [ $? -ne 0 ]; then
-    echo "[!] cppcheck not installed. Unable to perform static analysis." >&2
-    exit 1
-fi
+RETURN
 
 DIFF=$(which colordiff)
 if [ $? -ne 0 ]; then
