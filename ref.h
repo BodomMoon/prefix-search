@@ -13,6 +13,8 @@ char *mpalloc (pool **p, size_t size);
 
 pool *mpfreeback(pool **ptr , size_t size);
 
-void pool_free(pool *p) ;
+void pool_free(pool *p);
+
+int getLarge( pool *ptr);
 
 #endif
