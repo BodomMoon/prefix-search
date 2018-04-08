@@ -58,12 +58,24 @@ plot: bench
 	gnuplot scripts/runtime.gp
 	gnuplot scripts/runtime2.gp
 
-cache-test: $(TESTS)
-	perf stat --repeat 5 \
+run-cache-test: $(TESTS)
+	echo 3 | sudo tee /proc/sys/vm/drop_caches
+	perf stat --repeat 1 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./test_cpy<test.txt>-
-	perf stat --repeat 5 \
+	echo 3 | sudo tee /proc/sys/vm/drop_caches
+	perf stat --repeat 1 \
 		-e cache-misses,cache-references,instructions,cycles \
 		./test_ref<test.txt>-
+
+build-cache-test: $(TESTS)
+	echo 3 | sudo tee /proc/sys/vm/drop_caches
+	perf stat --repeat 1 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./test_cpy<test2.txt>-
+	echo 3 | sudo tee /proc/sys/vm/drop_caches
+	perf stat --repeat 1 \
+		-e cache-misses,cache-references,instructions,cycles \
+		./test_ref<test2.txt>-
 
 -include $(deps)
