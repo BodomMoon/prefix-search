@@ -5,7 +5,7 @@
 #include <assert.h>
 
 #include "tst.h"
-#include "ref.h"
+
 /** constants insert, delete, max word(s) & stack nodes */
 enum { INS, DEL, WRDMAX = 256, STKMAX = 512, LMAX = 8192 };
 #define REF INS
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
     FILE *fp = fopen(IN_FILE, "r");
     double t1, t2;
     struct timespec ts1,ts2;
-    pool *ptr = init(1000000);
+    pool *ptr = init(25000000);
     int flag = 0;
 
     if (!fp) { /* prompt, open, validate file for reading */
@@ -56,32 +56,23 @@ int main(int argc, char **argv)
     }
 
     clock_gettime(CLOCK_REALTIME, &ts1);
-    while ((rtn = fscanf(fp, "%s", word)) != EOF) {
+    fscanf(fp, "%s", word);
+    do {
         flag = 0;
-           //printf("word = %s\n", word);
         char *p = mpalloc(&ptr , strlen(word)+1);
-        //printf("befora current place = %p value = %p\n", &ptr->current,ptr->current);
-        //printf("befora p place = %p value = %p\n", &p,p);
         strncpy( p,word,strlen(word));//why is change ptr????
         p[strlen(word)] = 0;
-        //printf("after current = %p p = %p\n", &ptr->current,ptr->current);
-        assert(p && "insert fail");
-        //printf("p = %s\n", p);
-        if (!tst_ins_del(&root, &p, INS, REF,&flag)) {
+        if (!tst_ins_del(&root, &p, INS, REF,&flag , ptr)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
         }
-        //printf("root place = %p value = %p char = %c\n",&root,root,(*(char*)root));
-     
         if(flag==0){
         }else{
             mpfreeback(&ptr,strlen(word)+1);
         }
-
         idx++;
-        //getchar();
-    }
+    } while ((rtn = fscanf(fp, "%s", word)) != EOF);
     clock_gettime(CLOCK_REALTIME, &ts2);
     t1 = tvgetf(&ts1);
     t2 = tvgetf(&ts2);
@@ -115,7 +106,7 @@ int main(int argc, char **argv)
             char *p = mpalloc(&ptr , strlen(word)+1);
             strncpy( p,word,strlen(word));
             p[strlen(word)] = 0;
-            res = tst_ins_del(&root, &p, INS, CPY,&flag);
+            res = tst_ins_del(&root, &p, INS, CPY,&flag,ptr);
             if(flag==0){
             }else{
                 mpfreeback(&ptr,strlen(word)+1);
@@ -189,7 +180,7 @@ int main(int argc, char **argv)
             p = word;
             printf("  deleting %s\n", word);
             clock_gettime(CLOCK_REALTIME, &ts1);
-            res = tst_ins_del(&root, &p, DEL, CPY,&flag);
+            res = tst_ins_del(&root, &p, DEL, CPY,&flag,ptr);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
@@ -206,8 +197,9 @@ int main(int argc, char **argv)
             }
             break;
         case 'q':
-            tst_free_all(root,REF);
             pool_free(ptr);
+            fflush(stdin);
+            fflush(stdout);
             return 0;
             break;
         default:
