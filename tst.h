@@ -21,7 +21,8 @@ typedef struct tst_node tst_node;
 void *tst_ins_del(tst_node **root,
                   char *const *s,
                   const int del,
-                  const int cpy);
+                  const int cpy,
+                  int *flag);
 
 /** tst_search(), non-recursive find of a string in ternary tree.
  *  returns pointer to 's' on success, NULL otherwise.
@@ -60,10 +61,10 @@ void tst_traverse_fn(const tst_node *p,
                      void *data);
 
 /** free the ternary search tree rooted at p, data storage internal. */
-void tst_free_all(tst_node *p);
+void tst_free_all(tst_node *p,int CPY);
 
 /** free the ternary search tree rooted at p, data storage external. */
-void tst_free(tst_node *p);
+/*void tst_free(tst_node *p);*/
 
 /** access functions tst_get_key(), tst_get_refcnt, & tst_get_string().
  *  provide access to struct members through opague pointers availale
