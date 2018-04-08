@@ -65,8 +65,10 @@ int main(int argc, char **argv)
 
     fclose(fp);
     printf("ternary_tree, loaded %d words in %.6f sec\n", idx, t2 - t1);
-    printf("loaded-Clock %ld \n", ts2.tv_nsec - ts1.tv_nsec);
-
+    if(ts1.tv_sec == ts2.tv_sec)
+        printf("load-Clock %ld \n\n", ts2.tv_nsec - ts1.tv_nsec);
+    else
+        printf("load-Clock %ld \n\n", ts2.tv_nsec+1000000000 - ts1.tv_nsec);
     for (;;) {
         char *p;
         printf(
@@ -136,6 +138,8 @@ int main(int argc, char **argv)
                 printf("  %s - searched prefix in %.6f sec\n", word, t2 - t1);
                 if(ts1.tv_sec == ts2.tv_sec)
                     printf("Clock %ld \n\n", ts2.tv_nsec - ts1.tv_nsec);
+                else
+                    printf("Clock %ld \n\n", ts2.tv_nsec+1000000000 - ts1.tv_nsec);
                 for (int i = 0; i < sidx; i++)
                     printf("suggest[%d] : %s\n", i, sgl[i]);
             } else
@@ -168,7 +172,7 @@ int main(int argc, char **argv)
             return 0;
             break;
         default:
-            fprintf(stderr, "error: invalid selection.\n");
+            fprintf(stderr, "error:CPY invalid selection.\n");
             break;
         }
     }
