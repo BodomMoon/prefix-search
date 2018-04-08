@@ -1,5 +1,6 @@
 #include "tst.h"
 
+
 /** max word length to store in ternary search tree, stack size */
 #define WRDMAX 128
 #define STKMAX (WRDMAX * 2)
@@ -215,12 +216,11 @@ static void *tst_del_word(tst_node **root,
  *  non-zero), NULL on allocation failure on insert, or on successful removal
  *  of 's' from tree.
  */
-void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy , int *flag)
+void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy , int *flag ,pool *ptr)
 {
 
     int diff;
     const char *p = *s;
-    
 
     tst_stack stk = {.data = {NULL}, .idx = 0};
     tst_node *curr, **pcurr;
@@ -269,10 +269,20 @@ void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy 
          * string.h and initialize w/memset) to avoid valgrind warning
          * "Conditional jump or move depends on uninitialised value(s)"
          */
-        if (!(*pcurr = calloc(1, sizeof **pcurr))) {
-            puts("calloc fail");
-            fprintf(stderr, "error: tst_insert(), memory exhausted.\n");
-            return NULL;
+        if(!cpy){
+            if (!(*pcurr =(void*) mpalloc(&ptr, sizeof **pcurr))){
+                puts("calloc fail");
+                fprintf(stderr, "error: tst_insert(), memory exhausted.\n");
+                return NULL;
+            }
+
+        }
+        else {
+            if (!(*pcurr = calloc(1, sizeof **pcurr))) {
+                puts("calloc fail");
+                fprintf(stderr, "error: tst_insert(), memory exhausted.\n");
+                return NULL;
+            }
         }
         curr = *pcurr;
         curr->key = *p;
