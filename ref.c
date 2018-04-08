@@ -6,29 +6,20 @@ typedef struct memory_pool {
 }pool;
 
 pool *init (size_t size){
-	pool *ptr = (pool*)calloc( 1 , sizeof(pool));
+	/*pool *ptr = (pool*)calloc( 1 , sizeof(pool));
 	ptr->current =(char*) malloc(size);
-	ptr->tail = ptr->current + size;
+	ptr->tail =(char*) ptr + size;*/
 
-	/*pool *ptr = (pool*)calloc( 1 , size);
-	printf("current place %p value %p\n",&ptr->current , ptr->current );
-	printf("tail place %p value %p\n",  &ptr->tail , ptr ->tail);
+	pool *ptr = (pool*)calloc( 1 , size);
 	ptr->current = (char*)ptr + sizeof(pool);
-	ptr->tail = (char*)ptr + size;
-	getchar();*/
-	/*printf("cur = %p tai = %p\n",ptr->current,ptr->tail );
-	printf("cur place = %p value = %p\n",&(*ptr).current,ptr->current );
-	printf("tail place = %p value = %p\n",&(*ptr).tail,ptr->tail );*/
+	ptr->tail =(char*) ptr + size;
 	return ptr;
 }
 
 char *mpalloc(pool **ptr , size_t size) {
-	//printf("get %p\n", ptr->current);
 	if(((*ptr) -> tail - (*ptr) -> current) > size){
 		char *temp = (*ptr)->current;
-		//printf("before size = %ld temp is in %p current is in %p tail is in%p\n",size, temp, (*ptr)->current,(*ptr)->tail);
 		(*ptr)->current += size;
-		//printf("after size = %ld temp is in %p current is in %p tail is in%p\n",size, temp, (*ptr)->current,(*ptr)->tail);
 		return temp;
 	}
 	else
