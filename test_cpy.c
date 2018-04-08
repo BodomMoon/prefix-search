@@ -33,7 +33,7 @@ static void rmcrlf(char *s)
 #define IN_FILE "cities.txt"
 
 int main(int argc, char **argv)
-{
+{   int flag = 0;
     char word[WRDMAX] = "";
     char *sgl[LMAX] = {NULL};
     tst_node *root = NULL, *res = NULL;
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
         char *p = word;
         /*printf("%s\n", word);
         getchar();*/
-        if (!tst_ins_del(&root, &p, INS, CPY)) {
+        if (!tst_ins_del(&root, &p, INS, CPY,&flag)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
             rmcrlf(word);
             p = word;
             clock_gettime(CLOCK_REALTIME, &ts1);
-            res = tst_ins_del(&root, &p, INS, CPY);
+            res = tst_ins_del(&root, &p, INS, CPY,&flag);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
             p = word;
             printf("  deleting %s\n", word);
             clock_gettime(CLOCK_REALTIME, &ts1);
-            res = tst_ins_del(&root, &p, DEL, CPY);
+            res = tst_ins_del(&root, &p, DEL, CPY,NULL);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
             }
             break;
         case 'q':
-            tst_free_all(root);
+            tst_free_all(root,REF);
             return 0;
             break;
         default:
