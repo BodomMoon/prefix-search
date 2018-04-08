@@ -11,13 +11,14 @@ pool *init (size_t size){
 	ptr->tail = ptr->current + size;
 
 	/*pool *ptr = (pool*)calloc( 1 , size);
-	ptr->current = (char*)ptr;
-	ptr->tail = ptr->current + size;
-	ptr->current += sizeof(pool);*/
-
-	printf("cur = %p tai = %p\n",ptr->current,ptr->tail );
+	printf("current place %p value %p\n",&ptr->current , ptr->current );
+	printf("tail place %p value %p\n",  &ptr->tail , ptr ->tail);
+	ptr->current = (char*)ptr + sizeof(pool);
+	ptr->tail = (char*)ptr + size;
+	getchar();*/
+	/*printf("cur = %p tai = %p\n",ptr->current,ptr->tail );
 	printf("cur place = %p value = %p\n",&(*ptr).current,ptr->current );
-	printf("tail place = %p value = %p\n",&(*ptr).tail,ptr->tail );
+	printf("tail place = %p value = %p\n",&(*ptr).tail,ptr->tail );*/
 	return ptr;
 }
 
@@ -41,7 +42,10 @@ pool *mpfreeback(pool **ptr , size_t size) {
 	return (*ptr);
 }
 
-void pool_free(pool *p) 
-{
+void pool_free(pool *p) {
     free(p);
+}
+
+int getLarge( pool *ptr){
+	return (int)(ptr->tail - ptr ->current);
 }
