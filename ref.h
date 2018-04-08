@@ -7,9 +7,11 @@
 
 typedef struct memory_pool pool;
 
-pool * init (size_t size);
+pool *init (size_t size);
 
-char * mpalloc (pool *p, size_t size);
+char *mpalloc (pool **p, size_t size);
+
+pool *mpfreeback(pool **ptr , size_t size);
 
 void pool_free(pool *p) ;
 
