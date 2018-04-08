@@ -6,15 +6,14 @@ typedef struct memory_pool {
 }pool;
 
 pool *init (size_t size){
-	/*pool *ptr = (pool*)calloc( 1 , sizeof(pool));
+	pool *ptr = (pool*)calloc( 1 , sizeof(pool));
 	ptr->current =(char*) malloc(size);
-	ptr->tail = ptr->current + size;*/
+	ptr->tail = ptr->current + size;
 
-
-	pool *ptr = (pool*)calloc( 1 , size);
+	/*pool *ptr = (pool*)calloc( 1 , size);
 	ptr->current = (char*)ptr;
 	ptr->tail = ptr->current + size;
-	ptr->current += sizeof(pool);
+	ptr->current += sizeof(pool);*/
 
 	printf("cur = %p tai = %p\n",ptr->current,ptr->tail );
 	printf("cur place = %p value = %p\n",&(*ptr).current,ptr->current );
