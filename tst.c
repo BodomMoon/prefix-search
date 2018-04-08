@@ -6,7 +6,7 @@
 
 /** ternary search tree node. */
 typedef struct tst_node {
-    char key;               /* char key for node (null for node with string) */
+    char key;               /* char ke y for node (null for node with string) */
     unsigned refcnt;        /* refcnt tracks occurrence of word (for delete) */
     struct tst_node *lokid; /* ternary low child pointer */
     struct tst_node *eqkid; /* ternary equal child pointer */
@@ -215,29 +215,42 @@ static void *tst_del_word(tst_node **root,
  *  non-zero), NULL on allocation failure on insert, or on successful removal
  *  of 's' from tree.
  */
-void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy)
+void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy , int *flag)
 {
+
     int diff;
     const char *p = *s;
+    
+
     tst_stack stk = {.data = {NULL}, .idx = 0};
     tst_node *curr, **pcurr;
 
-    if (!root || !*s)
+    if (!root || !*s){
+        puts("null str");
         return NULL;                 /* validate parameters */
-    if (strlen(*s) + 1 > STKMAX / 2) /* limit length to 1/2 STKMAX */
-        return NULL;                 /* 128 char word length is plenty */
+    }
+    if (strlen(*s) + 1 > STKMAX / 2){
+        puts("long out of limit");
+        return NULL;
+    } /* limit length to 1/2 STKMAX */
+                         /* 128 char word length is plenty */
 
     pcurr = root;                     /* start at root */
     while ((curr = *pcurr)) {         /* iterate to insertion node  */
+        /*printf("%c \n", curr->key);
+        printf("%c ", *p);*/
+
         diff = *p - curr->key;        /* get ASCII diff for >, <, = */
         if (diff == 0) {              /* if char equal to node->key */
             if (*p++ == 0) {          /* check if word is duplicate */
                 if (del) {            /* delete instead of insert   */
                     (curr->refcnt)--; /* decrement reference count  */
                     /* chk refcnt, del 's', return NULL on successful del */
-                    return tst_del_word(root, curr, &stk, 1);
+                    return tst_del_word(root, curr, &stk, cpy);
                 } else
                     curr->refcnt++; /* increment refcnt if word exists */
+                //puts("time++");
+                (*flag) = (*flag) + 1;
                 return (void *) curr->eqkid; /* pointer to word / NULL on del */
             }
             pcurr = &(curr->eqkid); /* get next eqkid pointer address */
@@ -249,7 +262,7 @@ void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy)
         if (del)
             tst_stack_push(&stk, curr); /* push node on stack for del */
     }
-
+    //puts("while out");
     /* if not duplicate, insert remaining chars into tree rooted at curr */
     for (;;) {
         /* allocate memory for node, and fill. use calloc (or include
@@ -257,11 +270,13 @@ void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy)
          * "Conditional jump or move depends on uninitialised value(s)"
          */
         if (!(*pcurr = calloc(1, sizeof **pcurr))) {
+            puts("calloc fail");
             fprintf(stderr, "error: tst_insert(), memory exhausted.\n");
             return NULL;
         }
         curr = *pcurr;
         curr->key = *p;
+        
         curr->refcnt = 1;
         curr->lokid = curr->hikid = curr->eqkid = NULL;
 
@@ -277,6 +292,7 @@ void *tst_ins_del(tst_node **root, char *const *s, const int del, const int cpy)
                 return (void *) eqdata;
             } else { /* save pointer to 's' (allocated elsewhere) */
                 curr->eqkid = (tst_node *) *s;
+                //puts("pass");
                 return (void *) *s;
             }
         }
@@ -398,21 +414,21 @@ void tst_traverse_fn(const tst_node *p,
 }
 
 /** free the ternary search tree rooted at p, data storage internal. */
-void tst_free_all(tst_node *p)
+void tst_free_all(tst_node *p ,int CPY)
 {
     if (!p)
         return;
-    tst_free_all(p->lokid);
+    tst_free_all(p->lokid ,CPY);
     if (p->key)
-        tst_free_all(p->eqkid);
-    tst_free_all(p->hikid);
-    if (!p->key)
+        tst_free_all(p->eqkid,CPY);
+    tst_free_all(p->hikid,CPY);
+    if (!p->key && CPY)
         free(p->eqkid);
     free(p);
 }
 
 /** free the ternary search tree rooted at p, data storage external. */
-void tst_free(tst_node *p)
+/*void tst_free(tst_node *p)
 {
     if (!p)
         return;
@@ -421,7 +437,7 @@ void tst_free(tst_node *p)
         tst_free(p->eqkid);
     tst_free(p->hikid);
     free(p);
-}
+}*/
 
 /** access functions tst_get_key(), tst_get_refcnt, & tst_get_string().
  *  provide access to struct members through opaque pointers availale
