@@ -52,7 +52,7 @@ int main(int argc, char **argv)
         char *p = word;
         /*printf("%s\n", word);
         getchar();*/
-        if (!tst_ins_del(&root, &p, INS, CPY,&flag)) {
+        if (!tst_ins_del(&root, &p, INS, CPY,&flag,NULL)) {
             fprintf(stderr, "error: memory exhausted, tst_insert.\n");
             fclose(fp);
             return 1;
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
             rmcrlf(word);
             p = word;
             clock_gettime(CLOCK_REALTIME, &ts1);
-            res = tst_ins_del(&root, &p, INS, CPY,&flag);
+            res = tst_ins_del(&root, &p, INS, CPY,&flag,NULL);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
@@ -129,7 +129,6 @@ int main(int argc, char **argv)
             }
             rmcrlf(word);
             clock_gettime(CLOCK_REALTIME, &ts1);
-            //res = tst_search_prefix(root, word, sgl, &sidx, LMAX);
             res = tst_search_prefix(root, word, sgl, &sidx, LMAX);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
@@ -155,7 +154,7 @@ int main(int argc, char **argv)
             p = word;
             printf("  deleting %s\n", word);
             clock_gettime(CLOCK_REALTIME, &ts1);
-            res = tst_ins_del(&root, &p, DEL, CPY,NULL);
+            res = tst_ins_del(&root, &p, DEL, CPY,&flag,NULL);
             clock_gettime(CLOCK_REALTIME, &ts2);
             t1 = tvgetf(&ts1);
             t2 = tvgetf(&ts2);
@@ -169,6 +168,8 @@ int main(int argc, char **argv)
             break;
         case 'q':
             tst_free_all(root,REF);
+            fflush(stdin);
+            fflush(stdout);
             return 0;
             break;
         default:
